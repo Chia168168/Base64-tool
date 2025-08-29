@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>Base64 Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; }
+    .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; cursor: pointer; border: 1px solid #ccc; margin: 0 5px; }
+    .tab.active { background: #007bff; color: #fff; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    textarea { width: 100%; height: 150px; }
+    img.preview { max-width: 100%; max-height: 200px; display: block; margin: 10px auto; }
+    button { margin: 5px; }
+    progress { width: 100%; margin: 10px 0; }
+    .preview-container { display: flex; flex-wrap: wrap; gap: 10px; }
+    .preview-item { border: 1px solid #ccc; padding: 10px; width: 200px; text-align: center; }
+    .preview-item img { max-width: 100%; max-height: 100px; display: block; margin: 5px auto; }
+  </style>
+</head>
+<body>
+  <h1>Image Resizer & Base64 Tool</h1>
+
+<a href="https://chia168168.github.io/Teng-image-tools/">Teng-image-tools</a></a>
+<br/>
+<a href="https://chia168168.github.io/Base64-tool/">Base64-tool</a>
+<br/>
+
+
+    <h2>圖片 ➝ Base64</h2>
+    <input type="file" id="imgToBase64" accept="image/*">
+    <button onclick="downloadBase64()">下載 Base64 txt</button>
+    <textarea id="base64Output" placeholder="這裡會顯示 Base64 編碼"></textarea>
+    <br>
+    <img id="previewBase64Img" class="preview">
+
+    <hr>
+
+    <h2>Base64 ➝ 圖片</h2>
+    <textarea id="base64Input" placeholder="貼上 Base64 字串"></textarea>
+    <br>
+    <input type="file" id="base64File" accept=".txt">
+    <button onclick="convertBase64ToImage()">轉換並預覽</button>
+    <a id="downloadRestored" style="display:none" download="restored.png">下載圖片</a>
+    <br>
+    <img id="restoredImg" class="preview">
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/heic2any/dist/heic2any.min.js"></script>
+  <script>
+    // ========== Base64 工具 ==========
+    document.getElementById("imgToBase64").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById("base64Output").value = base64;
+        document.getElementById("previewBase64Img").src = base64;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function downloadBase64() {
+      const text = document.getElementById("base64Output").value;
+      if (!text) return alert("沒有可下載的 Base64 資料");
+      const blob = new Blob([text], {type: "text/plain"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "image_base64.txt";
+      link.click();
+    }
+
+    // Base64 ➝ 圖片：可貼字串或上傳 txt
+function convertBase64ToImage() {
+    const base64Text = document.getElementById("base64Input").value.trim();
+    const fileInput = document.getElementById("base64File");
+    if (base64Text) {
+      showRestoredImage(base64Text);
+    } else if (fileInput.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        showRestoredImage(e.target.result.trim());
+      };
+      reader.readAsText(fileInput.files[0]);
+    } else {
+      alert("請貼上 Base64 字串或選擇一個檔案");
+    }
+  }
+
+  function showRestoredImage(base64) {
+    // 🔹 自動補上 data:image/png;base64 前綴
+    if (!base64.startsWith("data:image")) {
+      base64 = "data:image/png;base64," + base64;
+    }
+
+    document.getElementById("restoredImg").src = base64;
+    const link = document.getElementById("downloadRestored");
+    link.href = base64;
+    link.style.display = "inline-block";
+  }
+  </script>
+</body>
+</html>
